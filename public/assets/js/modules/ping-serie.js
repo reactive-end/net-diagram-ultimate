@@ -1,11 +1,17 @@
 /**
  * PingSerie module — shared ping-series via Web Workers.
  * Parallel pings with status badges, ms display, and infinite-loop guard.
+ *
+ * Each item tracks its own state via dataset flags:
+ *   pingPending — '1' while a worker is running for this item
+ *   hasResult   — '1' after first ever completed result (success/fail/timeout/error)
  */
 const PingSerie = (() => {
     const H = DOMHelpers;
     let pingInterval = null;
-    let activeWorkers = [];
+    let activeWorkers = [];       // entries: { worker, item }
+    let singleRunPending = 0;    // count of unfinished workers in single-shot mode
+    let infiniteMode = false;
 
     function init() {
         const openBtn = document.getElementById('btn-ping-serie');
@@ -133,60 +139,125 @@ const PingSerie = (() => {
 
     // ---- Ping with Web Workers (truly parallel) ----
     function startPinging() {
-        document.getElementById('btn-start-ping-serie').style.display = 'none';
-        document.getElementById('btn-stop-ping-serie').style.display = '';
-        runPingSerie();
-        if (document.getElementById('infinite-ping').checked) {
-            pingInterval = setInterval(runPingSerie, 10000);
+        const infiniteChk = document.getElementById('infinite-ping');
+        infiniteMode = infiniteChk && infiniteChk.checked;
+
+        const startBtn = document.getElementById('btn-start-ping-serie');
+        const stopBtn = document.getElementById('btn-stop-ping-serie');
+
+        if (infiniteMode) {
+            // Ignore duplicate starts when already running in infinite mode
+            if (pingInterval !== null) return;
+            startBtn.style.display = 'none';
+            stopBtn.style.display = '';
+            runPingSerie();
+            pingInterval = setInterval(() => runPingSerie(), 10000);
+        } else {
+            // Single-shot mode: no Stop button shown
+            startBtn.disabled = true;
+            startBtn.textContent = 'Ejecutando...';
+            stopBtn.style.display = 'none';
+            singleRunPending = 0;
+            runPingSerie(true);
         }
     }
 
     function stopPinging() {
         if (pingInterval) { clearInterval(pingInterval); pingInterval = null; }
-        terminateAllWorkers();
-        document.getElementById('btn-start-ping-serie').style.display = '';
-        document.getElementById('btn-stop-ping-serie').style.display = 'none';
+
+        // Terminate every active worker and clear per-item pending flags
+        activeWorkers.forEach(entry => {
+            try { entry.worker.terminate(); } catch (e) {}
+            if (entry.item) {
+                entry.item.dataset.pingPending = '0';
+                entry.item.classList.remove('is-checking');
+            }
+        });
+        activeWorkers = [];
+        singleRunPending = 0;
+
+        // Restore buttons — do NOT wipe last known results from cards
+        const startBtn = document.getElementById('btn-start-ping-serie');
+        const stopBtn = document.getElementById('btn-stop-ping-serie');
+        if (startBtn) {
+            startBtn.style.display = '';
+            startBtn.disabled = false;
+            startBtn.textContent = 'Iniciar Ping';
+        }
+        if (stopBtn) stopBtn.style.display = 'none';
     }
 
+    /**
+     * Close the modal and reset all items back to idle.
+     */
     function close() {
         stopPinging();
         document.querySelectorAll('.ping-serie-item').forEach(item => {
             item.className = 'ping-serie-item ping-idle';
+            item.dataset.pingPending = '0';
+            delete item.dataset.hasResult;
             setBadge(item, 'idle', 'Sin conexión');
         });
         const m = document.getElementById('modal-ping-serie');
         if (m) m.style.display = 'none';
     }
 
-    function terminateAllWorkers() {
-        activeWorkers.forEach(w => { try { w.terminate(); } catch(e) {} });
-        activeWorkers = [];
-    }
-
-    function runPingSerie() {
-        // Terminate any still-running workers from previous cycle
-        terminateAllWorkers();
-
+    /**
+     * Launch a ping worker for each non-pending item.
+     *
+     * @param {boolean} isSingleRun - When true, track completion count and
+     *                                auto-restore the Start button when all finish.
+     */
+    function runPingSerie(isSingleRun = false) {
         const items = [...document.querySelectorAll('#ping-serie-list .ping-serie-item')];
-        if (items.length === 0) return;
+        if (items.length === 0) {
+            if (isSingleRun) restoreStartButton();
+            return;
+        }
+
+        let launchedCount = 0;
 
         items.forEach(item => {
-            // Skip if already in verifying/pinging state (infinite loop guard)
-            if (item.classList.contains('ping-pinging')) return;
+            // Skip items that already have a pending worker
+            if (item.dataset.pingPending === '1') return;
 
             const ip = item.querySelector('.ping-ip').textContent;
-            item.className = 'ping-serie-item ping-pinging';
-            setBadge(item, 'pinging', 'Verificando...');
 
-            const worker = new Worker(document.querySelector('script[data-worker="ping"]')?.dataset.src || '/assets/js/workers/ping-worker.js');
-            activeWorkers.push(worker);
+            // Mark this item as having a worker in flight
+            item.dataset.pingPending = '1';
 
-            worker.postMessage({ ip });
+            // Only show 'Verificando...' on first-ever runs (no prior result)
+            if (!item.dataset.hasResult) {
+                item.className = 'ping-serie-item ping-pinging';
+                setBadge(item, 'pinging', 'Verificando...');
+            } else {
+                // Rerun: keep existing badge/state, just add a subtle checking class
+                item.classList.add('is-checking');
+            }
+
+            const worker = new Worker(
+                document.querySelector('script[data-worker="ping"]')?.dataset.src
+                || '/assets/js/workers/ping-worker.js'
+            );
+
+            const entry = { worker, item };
+            activeWorkers.push(entry);
+            launchedCount++;
+
+            worker.postMessage({ ip, base: window.BASE_PATH || '' });
+
             worker.addEventListener('message', (e) => {
                 const { success, time_ms } = e.data;
+
+                // Clear pending and transient checking class
+                item.dataset.pingPending = '0';
+                item.dataset.hasResult = '1';
+                item.classList.remove('is-checking');
+
                 if (success) {
                     item.className = 'ping-serie-item ping-success';
-                    setBadge(item, 'success', (time_ms ? time_ms + ' ms' : 'Conectado'));
+                    const hasTime = time_ms !== null && time_ms !== undefined;
+                    setBadge(item, 'success', (hasTime ? time_ms + ' ms' : 'Conectado'));
                 } else if (time_ms === null) {
                     item.className = 'ping-serie-item ping-timeout';
                     setBadge(item, 'timeout', 'Sin respuesta');
@@ -194,17 +265,45 @@ const PingSerie = (() => {
                     item.className = 'ping-serie-item ping-fail';
                     setBadge(item, 'fail', 'Error');
                 }
+
                 worker.terminate();
-                activeWorkers = activeWorkers.filter(w => w !== worker);
+                activeWorkers = activeWorkers.filter(w => w !== entry);
+
+                if (isSingleRun) {
+                    singleRunPending--;
+                    if (singleRunPending <= 0) restoreStartButton();
+                }
             });
 
             worker.addEventListener('error', () => {
+                item.dataset.pingPending = '0';
+                item.dataset.hasResult = '1';
+                item.classList.remove('is-checking');
                 item.className = 'ping-serie-item ping-fail';
                 setBadge(item, 'fail', 'Error');
+
                 worker.terminate();
-                activeWorkers = activeWorkers.filter(w => w !== worker);
+                activeWorkers = activeWorkers.filter(w => w !== entry);
+
+                if (isSingleRun) {
+                    singleRunPending--;
+                    if (singleRunPending <= 0) restoreStartButton();
+                }
             });
         });
+
+        if (isSingleRun) {
+            singleRunPending = launchedCount;
+            if (launchedCount === 0) restoreStartButton();
+        }
+    }
+
+    function restoreStartButton() {
+        const startBtn = document.getElementById('btn-start-ping-serie');
+        if (startBtn) {
+            startBtn.disabled = false;
+            startBtn.textContent = 'Iniciar Ping';
+        }
     }
 
     function setBadge(item, state, text) {

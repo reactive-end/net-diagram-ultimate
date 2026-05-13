@@ -1,12 +1,13 @@
 /**
  * Ping Worker — runs a single ping via fetch in a Web Worker.
- * Receives { ip } via postMessage.
+ * Receives { ip, base } via postMessage.
  * Posts back { ip, success, time_ms, raw }.
  */
 self.addEventListener('message', async (e) => {
-    const { ip } = e.data;
+    const { ip, base } = e.data;
+    const url = (base || '') + '/api/ping';
     try {
-        const res = await fetch('/api/ping', {
+        const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ip }),

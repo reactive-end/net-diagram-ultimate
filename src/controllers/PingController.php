@@ -15,6 +15,9 @@ class PingController
     public function ping(array $params, Request $request): void
     {
         Auth::require();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
 
         $ip = $request->input('ip', '');
 
@@ -24,7 +27,7 @@ class PingController
         }
 
         // Safe: $ip is guaranteed to be a valid IP address format
-        $cmd = sprintf('ping -n 1 %s', escapeshellarg($ip));
+        $cmd = sprintf('ping -n 1 -l 1 -w 1000 %s', escapeshellarg($ip));
         $output = [];
         $returnCode = 0;
         exec($cmd, $output, $returnCode);
@@ -37,10 +40,11 @@ class PingController
         ];
 
         // Extract response time if available
+        // Supports: "tiempo<1m", "tiempo=2ms", "time<1ms", "time=5ms", "time=10 ms"
         foreach ($output as $line) {
-            if (preg_match('/tiempo[=<]\s*(\d+)\s*ms/i', $line, $m)
-                || preg_match('/time[=<]\s*(\d+)\s*ms/i', $line, $m)) {
-                $result['time_ms'] = (int) $m[1];
+            if (preg_match('/tiempo([<=])\s*(\d+)\s*m/i', $line, $m)
+                || preg_match('/time([<=])\s*(\d+)\s*m/i', $line, $m)) {
+                $result['time_ms'] = ($m[1] === '<') ? 0 : (int) $m[2];
                 break;
             }
         }

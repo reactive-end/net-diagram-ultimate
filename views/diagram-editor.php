@@ -466,7 +466,7 @@ $canvasHeight = (int) ($diagram['height'] ?? 800);
                     <?php foreach ($serieIps as $ip): ?>
                     <div class="ping-serie-item ping-idle" data-id="<?= (int) $ip['id_ip'] ?>">
                         <div class="ping-ip-row">
-                            <span class="ping-status-dot" style="background:var(--gray-300);"></span>
+                            <span class="ping-status-badge badge-idle">Sin conexión</span>
                             <span class="ping-ip"><?= htmlspecialchars($ip['ip']) ?></span>
                         </div>
                         <span class="ping-name"><?= htmlspecialchars($ip['nombre_asociado'] ?? '') ?></span>
@@ -479,7 +479,7 @@ $canvasHeight = (int) ($diagram['height'] ?? 800);
                     <?php endforeach; ?>
                 </div>
                 <div class="ping-serie-add">
-                    <div class="ip-input-container" style="flex:2;min-width:220px;">
+                    <div class="ip-input-container" style="flex:2;min-width:160px;">
                         <input type="text" class="form-input ip-octet" maxlength="3" pattern="[0-9]*" inputmode="numeric" data-octet="0" placeholder="192">
                         <span class="ip-dot">.</span>
                         <input type="text" class="form-input ip-octet" maxlength="3" pattern="[0-9]*" inputmode="numeric" data-octet="1" placeholder="168">
@@ -489,8 +489,8 @@ $canvasHeight = (int) ($diagram['height'] ?? 800);
                         <input type="text" class="form-input ip-octet" maxlength="3" pattern="[0-9]*" inputmode="numeric" data-octet="3" placeholder="1">
                     </div>
                     <input type="hidden" id="new-ip-hidden" class="ip-hidden">
-                    <input type="text" id="new-ip-name" class="form-input" placeholder="Nombre asociado" style="flex:1;min-width:120px;">
-                    <input type="text" id="new-ip-contact" class="form-input" placeholder="N° Contacto" style="flex:1;min-width:100px;">
+                    <input type="text" id="new-ip-name" class="form-input" placeholder="Nombre asociado" style="flex:1;min-width:100px;">
+                    <input type="text" id="new-ip-contact" class="form-input" placeholder="N° Contacto" style="flex:1;min-width:90px;">
                     <button class="btn btn-secondary btn-sm" id="btn-add-ip">Agregar IP</button>
                 </div>
             </div>

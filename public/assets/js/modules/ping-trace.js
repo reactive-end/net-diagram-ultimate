@@ -363,7 +363,7 @@ const PingTrace = (() => {
         let badgeClass, badgeText;
         if (success) {
             badgeClass = 'success';
-            badgeText = timeMs ? timeMs + ' ms' : 'Éxito';
+            badgeText = (timeMs !== null && timeMs !== undefined) ? timeMs + ' ms' : 'Éxito';
         } else if (timeMs === null) {
             badgeClass = 'timeout';
             badgeText = 'Sin respuesta';
@@ -371,7 +371,7 @@ const PingTrace = (() => {
             badgeClass = 'fail';
             badgeText = 'Error';
         }
-        const timeDisplay = success && timeMs ? timeMs + ' ms' : '';
+        const timeDisplay = success && timeMs !== null && timeMs !== undefined ? timeMs + ' ms' : '';
 
         const card = document.createElement('div');
         card.className = 'trace-hop-card';

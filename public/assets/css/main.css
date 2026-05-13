@@ -765,7 +765,7 @@ a:hover { text-decoration: underline; }
 }
 .modal-sm { max-width: 400px; }
 .modal-lg { max-width: 700px; }
-.modal-xl { max-width: 900px; }
+.modal-xl { max-width: 1200px; }
 @keyframes modalIn {
     from { opacity: 0; transform: translateY(-20px) scale(0.97); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -908,6 +908,11 @@ a:hover { text-decoration: underline; }
     border-left: 4px solid var(--orange);
     background: #fffbeb;
 }
+/* Subtle checking indicator for reruns — does not wipe existing state */
+.ping-serie-item.is-checking {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+    transition: box-shadow 0.3s ease;
+}
 .ping-serie-item .ping-status-dot {
     width: 10px;
     height: 10px;
@@ -924,19 +929,19 @@ a:hover { text-decoration: underline; }
 }
 /* Status badge */
 .ping-status-badge {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border-radius: 10px;
     text-transform: uppercase;
     letter-spacing: 0.3px;
     white-space: nowrap;
 }
-.badge-idle    { background: #f1f5f9; color: #64748b; }
-.badge-pinging { background: #eff6ff; color: #3b82f6; }
-.badge-success { background: #f0fdf4; color: #166534; }
-.badge-fail    { background: #fef2f2; color: #991b1b; }
-.badge-timeout { background: #fffbeb; color: #92400e; }
+.badge-idle    { background: #e2e8f0; color: #475569; }
+.badge-pinging { background: #dbeafe; color: #1d4ed8; }
+.badge-success { background: #dcfce7; color: #166534; }
+.badge-fail    { background: #fee2e2; color: #991b1b; }
+.badge-timeout { background: #fef3c7; color: #92400e; }
 .ping-serie-item .ping-ip {
     font-family: 'Courier New', monospace;
     font-weight: 600;
@@ -964,9 +969,9 @@ a:hover { text-decoration: underline; }
     gap: 8px;
     padding-top: 16px;
     border-top: 1px solid var(--border);
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
-.ping-serie-add .form-input { flex: 1; min-width: 120px; }
+.ping-serie-add .form-input { flex: 1; min-width: 90px; }
 .ping-serie-results { max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
 
 /* --- Trace Modal --- */

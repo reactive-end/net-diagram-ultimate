@@ -20,7 +20,8 @@ const PingModule = (() => {
             try {
                 const res = await API.post('/api/ping', { ip });
                 const status = res.data.success ? 'ping-success' : 'ping-fail';
-                const time = res.data.time_ms ? res.data.time_ms + 'ms' : 'timeout';
+                const hasTime = res.data.time_ms !== null && res.data.time_ms !== undefined;
+                const time = hasTime ? res.data.time_ms + 'ms' : 'timeout';
                 resultsEl.innerHTML += '<div class="ping-result ' + status + '">#' + (i + 1) + ': ' + time + '</div>';
             } catch (err) {
                 resultsEl.innerHTML += '<div class="ping-result ping-fail">#' + (i + 1) + ': error de conexion</div>';
@@ -77,7 +78,8 @@ const PingModule = (() => {
             try {
                 const res = await API.post('/api/ping', { ip });
                 const status = res.data.success ? 'ping-success' : 'ping-fail';
-                const time = res.data.success ? (res.data.time_ms || '?') + 'ms' : 'timeout';
+                const hasTime = res.data.time_ms !== null && res.data.time_ms !== undefined;
+                const time = res.data.success ? (hasTime ? res.data.time_ms : '?') + 'ms' : 'timeout';
                 resultsEl.innerHTML += '<div class="ping-result ' + status + '"><strong>' + ip + '</strong> — ' + time + '</div>';
             } catch (err) {
                 resultsEl.innerHTML += '<div class="ping-result ping-fail"><strong>' + ip + '</strong> — error</div>';
