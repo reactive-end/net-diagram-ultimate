@@ -429,23 +429,6 @@ $canvasHeight = (int) ($diagram['height'] ?? 800);
         </div>
     </div>
 
-    <!-- Delete Confirmation -->
-    <div class="modal-overlay" id="modal-delete" style="display:none;">
-        <div class="modal modal-sm">
-            <div class="modal-header">
-                <h2>Confirmar Eliminación</h2>
-                <button class="modal-close" onclick="UIModals.close('modal-delete')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>¿Estás seguro? Esta acción es irreversible.</p>
-                <div class="modal-actions">
-                    <button class="btn btn-outline" onclick="UIModals.close('modal-delete')">Cancelar</button>
-                    <button class="btn btn-danger" id="btn-confirm-delete">Eliminar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Ping Serie Modal -->
     <div class="modal-overlay" id="modal-ping-serie" style="display:none;">
         <div class="modal modal-xl">

@@ -3,6 +3,7 @@
  */
 const UIModals = (() => {
     const H = DOMHelpers;
+    let confirmHandler = null;
 
     /** Close all open modals */
     function closeAll() {
@@ -41,6 +42,92 @@ const UIModals = (() => {
         }
     }
 
-    return { closeAll, close, open, toggleTaskbar };
+    /**
+     * Show a reusable confirmation modal.
+     * @param {Object} opts
+     * @param {string} [opts.title='Confirm deletion']
+     * @param {string} [opts.message='This action cannot be undone.']
+     * @param {string} [opts.confirmText='Delete']
+     * @param {string} [opts.cancelText='Cancel']
+     * @param {string} [opts.confirmClass='btn-danger']
+     * @param {Function} opts.onConfirm - Called once when user clicks confirm.
+     */
+    function confirm(opts) {
+        const overlay = H.$('modal-confirm-generic');
+        if (!overlay) return;
+
+        const titleEl     = H.$('confirm-modal-title');
+        const msgEl       = H.$('confirm-modal-message');
+        const cancelBtn   = H.$('confirm-modal-cancel');
+        const acceptBtn   = H.$('confirm-modal-accept');
+
+        if (!titleEl || !msgEl || !cancelBtn || !acceptBtn) return;
+
+        // Set texts
+        titleEl.textContent   = opts.title   || 'Confirm deletion';
+        msgEl.textContent     = opts.message || 'This action cannot be undone.';
+        cancelBtn.textContent = opts.cancelText || 'Cancel';
+        acceptBtn.textContent = opts.confirmText || 'Delete';
+
+        // Reset accept button classes, keep base
+        acceptBtn.className = 'btn';
+        if (opts.confirmClass) {
+            acceptBtn.classList.add(...opts.confirmClass.split(' '));
+        } else {
+            acceptBtn.classList.add('btn-danger');
+        }
+
+        // Store the handler (one-shot)
+        confirmHandler = opts.onConfirm || null;
+
+        overlay.style.display = 'flex';
+    }
+
+    /** Wire up confirmation modal events — called once at module init */
+    function initConfirmModal() {
+        const overlay = H.$('modal-confirm-generic');
+        if (!overlay) return;
+
+        const closeModal = () => {
+            overlay.style.display = 'none';
+            confirmHandler = null;
+        };
+
+        // Cancel button
+        const cancelBtn = H.$('confirm-modal-cancel');
+        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+        // X button
+        const closeX = H.$('confirm-modal-close');
+        if (closeX) closeX.addEventListener('click', closeModal);
+
+        // Overlay background click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
+
+        // Accept button — one-shot via confirmHandler
+        const acceptBtn = H.$('confirm-modal-accept');
+        if (acceptBtn) {
+            acceptBtn.addEventListener('click', () => {
+                if (typeof confirmHandler === 'function') {
+                    const handler = confirmHandler;
+                    // Clear before calling so re-entrant calls work
+                    confirmHandler = null;
+                    handler();
+                }
+                overlay.style.display = 'none';
+            });
+        }
+    }
+
+    // Auto-init on DOMContentLoaded if not already late
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initConfirmModal);
+    } else {
+        initConfirmModal();
+    }
+
+    return { closeAll, close, open, toggleTaskbar, confirm };
 })();
 

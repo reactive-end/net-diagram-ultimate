@@ -801,6 +801,14 @@ a:hover { text-decoration: underline; }
     margin-top: 20px;
 }
 
+/* Confirm modal: centered message text */
+.confirm-modal .modal-body {
+    text-align: center;
+}
+.confirm-modal .modal-actions {
+    justify-content: center;
+}
+
 /* --- Ping Serie Edit Modal --- */
 .ping-edit-form .form-group { margin-bottom: 12px; }
 

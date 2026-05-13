@@ -89,10 +89,23 @@ const PingSerie = (() => {
         else if (e.target.classList.contains('edit-ip')) openEditModal(item);
     }
 
-    async function deleteIp(item) {
+    function deleteIp(item) {
         const id = item.dataset.id;
-        try { await API.del('/api/ip-serie/' + id); item.remove(); H.toast('IP eliminada.', 'info'); }
-        catch (err) { H.toast('Error: ' + err.message, 'error'); }
+        UIModals.confirm({
+            title: 'Confirmar eliminación',
+            message: '¿Seguro que deseas eliminar esta IP de la serie?',
+            confirmText: 'Eliminar',
+            cancelText: 'Cancelar',
+            onConfirm: async () => {
+                try {
+                    await API.del('/api/ip-serie/' + id);
+                    item.remove();
+                    H.toast('IP eliminada.', 'info');
+                } catch (err) {
+                    H.toast('Error: ' + err.message, 'error');
+                }
+            }
+        });
     }
 
     function openEditModal(item) {

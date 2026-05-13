@@ -122,22 +122,6 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="modal-delete-diagram" style="display:none;">
-        <div class="modal modal-sm">
-            <div class="modal-header">
-                <h2>Eliminar Diagrama</h2>
-                <button class="modal-close" onclick="closeModal('modal-delete-diagram')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>¿Estás seguro? Esta acción es irreversible y eliminará todos los objetos del diagrama.</p>
-                <div class="modal-actions">
-                    <button class="btn btn-outline" onclick="closeModal('modal-delete-diagram')">Cancelar</button>
-                    <button class="btn btn-danger" id="btn-confirm-delete">Eliminar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Ping Serie Modal -->
     <div class="modal-overlay" id="modal-ping-serie" style="display:none;">
         <div class="modal modal-xl">
@@ -266,8 +250,22 @@ document.querySelectorAll('.context-item').forEach(item => {
             document.getElementById('clone-name').value = contextTarget.dataset.name + ' (copia)';
             openModal('modal-clone-diagram');
         } else if (action === 'delete') {
-            document.getElementById('btn-confirm-delete').dataset.diagramId = contextTarget.dataset.id;
-            openModal('modal-delete-diagram');
+            const diagramId = contextTarget.dataset.id;
+            UIModals.confirm({
+                title: 'Confirmar eliminación',
+                message: '¿Seguro que deseas eliminar este diagrama? También se eliminarán todos sus objetos.',
+                confirmText: 'Eliminar',
+                cancelText: 'Cancelar',
+                onConfirm: async () => {
+                    const res = await fetch(BASE + '/api/diagram/' + diagramId, { method: 'DELETE' });
+                    const data = await res.json();
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                }
+            });
         }
     });
 });
@@ -309,18 +307,6 @@ document.getElementById('form-clone-diagram').addEventListener('submit', async (
     const data = await res.json();
     if (data.success) {
         window.location.href = data.data.redirect;
-    } else {
-        alert(data.message);
-    }
-});
-
-// --- Delete diagram ---
-document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
-    const id = document.getElementById('btn-confirm-delete').dataset.diagramId;
-    const res = await fetch(BASE + '/api/diagram/' + id, { method: 'DELETE' });
-    const data = await res.json();
-    if (data.success) {
-        window.location.reload();
     } else {
         alert(data.message);
     }

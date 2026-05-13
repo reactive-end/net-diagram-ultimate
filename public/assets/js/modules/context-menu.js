@@ -96,7 +96,13 @@ const ContextMenu = (() => {
         if (!el) return;
         if (!el.classList.contains('line')) return;
         if (action === 'delete-line') {
-            LinkSystem.deleteLinePair(el);
+            UIModals.confirm({
+                title: 'Confirmar eliminación',
+                message: '¿Seguro que deseas eliminar este enlace? Esta acción es irreversible.',
+                confirmText: 'Eliminar',
+                cancelText: 'Cancelar',
+                onConfirm: () => LinkSystem.deleteLinePair(el)
+            });
         }
     }
 
@@ -145,19 +151,19 @@ const ContextMenu = (() => {
     }
 
     function deleteObject(el) {
-        H.$('modal-delete').style.display = 'flex';
-
-        const confirmBtn = H.$('btn-confirm-delete');
-        const newHandler = () => {
-            const objectId = parseInt(el.dataset.id);
-            LinkSystem.deleteLinesForObject(objectId);
-            el.remove();
-            H.$('modal-delete').style.display = 'none';
-            DiagramState.markDirty();
-            H.toast('Dispositivo eliminado.', 'info');
-            confirmBtn.removeEventListener('click', newHandler);
-        };
-        confirmBtn.addEventListener('click', newHandler);
+        UIModals.confirm({
+            title: 'Confirmar eliminación',
+            message: '¿Seguro que deseas eliminar este dispositivo? Esta acción es irreversible.',
+            confirmText: 'Eliminar',
+            cancelText: 'Cancelar',
+            onConfirm: () => {
+                const objectId = parseInt(el.dataset.id);
+                LinkSystem.deleteLinesForObject(objectId);
+                el.remove();
+                DiagramState.markDirty();
+                H.toast('Dispositivo eliminado.', 'info');
+            }
+        });
     }
 
     return { init, showObjectMenu, showLineMenu };
