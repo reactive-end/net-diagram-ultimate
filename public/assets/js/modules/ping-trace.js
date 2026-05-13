@@ -44,8 +44,17 @@ const PingTrace = (() => {
             if (!inp) return;
             inp.value = '';
             delete inp.dataset.selectedId;
-            // Use a named function so we can remove old listeners
-            const handler = function onTraceInput() {
+            // Remove old listeners
+            inp.removeEventListener('input', inp._traceInputHandler);
+            inp.removeEventListener('change', inp._traceChangeHandler);
+            // Input handler: only clear selection, allow free typing
+            inp._traceInputHandler = function onTraceInput() {
+                delete inp.dataset.selectedId;
+                checkReady();
+            };
+            inp.addEventListener('input', inp._traceInputHandler);
+            // Change handler: resolve to device on explicit datalist select or blur
+            inp._traceChangeHandler = function onTraceChange() {
                 const val = inp.value;
                 const device = findDeviceById(val);
                 if (device) {
@@ -53,14 +62,10 @@ const PingTrace = (() => {
                     const ip = device.dataset.ip || '';
                     inp.value = name + (ip ? ' — ' + ip : '');
                     inp.dataset.selectedId = val;
-                } else {
-                    delete inp.dataset.selectedId;
                 }
                 checkReady();
             };
-            inp.removeEventListener('input', inp._traceHandler);
-            inp._traceHandler = handler;
-            inp.addEventListener('input', handler);
+            inp.addEventListener('change', inp._traceChangeHandler);
         });
 
         const btn = document.getElementById('btn-start-trace');

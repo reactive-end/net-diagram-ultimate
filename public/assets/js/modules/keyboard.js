@@ -91,5 +91,5 @@ const KeyboardShortcuts = (() => {
         }, 2000);
     }
 
-    return { init };
+    return { init, saveDiagram };
 })();
