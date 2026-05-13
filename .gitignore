@@ -1,0 +1,44 @@
+# Environment
+.env
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# OS
+Desktop.ini
+
+# Logs
+*.log
+/logs/
+
+# Cache / Temp
+/cache/
+/tmp/
+/temp/
+
+# Uploads (user-generated content)
+/public/uploads/
+
+# Backup files
+*.bak
+*.sql.bak
+*.zip
+*.tar.gz
+
+# Build artifacts
+/build/
+/dist/
+
+# Test coverage
+/coverage/
+.coverage
