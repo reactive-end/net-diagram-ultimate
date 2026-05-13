@@ -127,7 +127,18 @@
         <div class="modal modal-xl">
             <div class="modal-header">
                 <h2>Ping en Serie</h2>
-                <button class="modal-close" onclick="PingSerie.close()">&times;</button>
+                <div class="modal-header-actions ping-serie-header-actions">
+                    <button class="btn-icon" id="btn-edit-ping-serie" title="Activar edición" aria-label="Activar edición">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="btn-icon" id="btn-toggle-ping-layout" title="Vista Tabla">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                    </button>
+                    <button class="btn-icon" id="btn-export-ping-serie" title="Exportar PNG">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </button>
+                    <button class="modal-close" onclick="PingSerie.close()">&times;</button>
+                </div>
             </div>
             <div class="modal-body">
                 <div class="ping-serie-toolbar">
@@ -321,5 +332,6 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="<?= BASE_PATH ?>/assets/js/modules/api.js"></script>
 <script src="<?= BASE_PATH ?>/assets/js/modules/modals.js"></script>
 <script src="<?= BASE_PATH ?>/assets/js/modules/ping.js"></script>
+<script src="<?= BASE_PATH ?>/assets/js/libs/html2canvas.js"></script>
 <script data-worker="ping" data-src="<?= BASE_PATH ?>/assets/js/workers/ping-worker.js"></script>
 <script src="<?= BASE_PATH ?>/assets/js/modules/ping-serie.js"></script>

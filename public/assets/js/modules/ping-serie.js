@@ -12,6 +12,7 @@ const PingSerie = (() => {
     let activeWorkers = [];       // entries: { worker, item }
     let singleRunPending = 0;    // count of unfinished workers in single-shot mode
     let infiniteMode = false;
+    let editMode = false;         // whether edit/delete controls are visible
 
     function init() {
         const openBtn = document.getElementById('btn-ping-serie');
@@ -28,6 +29,17 @@ const PingSerie = (() => {
 
         const stopBtn = document.getElementById('btn-stop-ping-serie');
         if (stopBtn) stopBtn.addEventListener('click', stopPinging);
+
+        const toggleLayoutBtn = document.getElementById('btn-toggle-ping-layout');
+        if (toggleLayoutBtn) {
+            toggleLayoutBtn.addEventListener('click', toggleLayout);
+        }
+
+        const editBtn = document.getElementById('btn-edit-ping-serie');
+        if (editBtn) editBtn.addEventListener('click', toggleEditMode);
+
+        const exportBtn = document.getElementById('btn-export-ping-serie');
+        if (exportBtn) exportBtn.addEventListener('click', exportPingSerie);
 
         const list = document.getElementById('ping-serie-list');
         if (list) list.addEventListener('click', handleListItemClick);
@@ -211,6 +223,8 @@ const PingSerie = (() => {
             delete item.dataset.hasResult;
             setBadge(item, 'idle', 'Sin conexión');
         });
+        // Reset edit mode
+        if (editMode) toggleEditMode();
         const m = document.getElementById('modal-ping-serie');
         if (m) m.style.display = 'none';
     }
@@ -268,9 +282,14 @@ const PingSerie = (() => {
                 item.classList.remove('is-checking');
 
                 if (success) {
-                    item.className = 'ping-serie-item ping-success';
                     const hasTime = time_ms !== null && time_ms !== undefined;
-                    setBadge(item, 'success', (hasTime ? time_ms + ' ms' : 'Conectado'));
+                    if (hasTime && time_ms > 300) {
+                        item.className = 'ping-serie-item ping-latency';
+                        setBadge(item, 'latency', time_ms + ' ms');
+                    } else {
+                        item.className = 'ping-serie-item ping-success';
+                        setBadge(item, 'success', (hasTime ? time_ms + ' ms' : 'Conectado'));
+                    }
                 } else if (time_ms === null) {
                     item.className = 'ping-serie-item ping-timeout';
                     setBadge(item, 'timeout', 'Sin respuesta');
@@ -319,6 +338,36 @@ const PingSerie = (() => {
         }
     }
 
+    function toggleLayout() {
+        const list = document.getElementById('ping-serie-list');
+        const toggleBtn = document.getElementById('btn-toggle-ping-layout');
+        if (!list || !toggleBtn) return;
+
+        const isTable = list.classList.toggle('is-table');
+
+        if (toggleBtn.classList.contains('btn-icon')) {
+            // Icon-only button mode: toggle active class and update title/aria-label
+            toggleBtn.classList.toggle('active', isTable);
+            toggleBtn.title = isTable ? 'Vista Tarjetas' : 'Vista Tabla';
+            toggleBtn.setAttribute('aria-label', toggleBtn.title);
+        } else {
+            // Text button fallback
+            toggleBtn.textContent = isTable ? 'Vista Tarjetas' : 'Vista Tabla';
+        }
+    }
+
+    function toggleEditMode() {
+        editMode = !editMode;
+        const list = document.getElementById('ping-serie-list');
+        const editBtn = document.getElementById('btn-edit-ping-serie');
+        if (!list || !editBtn) return;
+
+        list.classList.toggle('is-editing', editMode);
+        editBtn.classList.toggle('active', editMode);
+        editBtn.title = editMode ? 'Desactivar edición' : 'Activar edición';
+        editBtn.setAttribute('aria-label', editBtn.title);
+    }
+
     function setBadge(item, state, text) {
         let badge = item.querySelector('.ping-status-badge');
         if (!badge) {
@@ -328,6 +377,60 @@ const PingSerie = (() => {
         }
         badge.className = 'ping-status-badge badge-' + state;
         badge.textContent = text;
+    }
+
+    function exportPingSerie() {
+        const list = document.getElementById('ping-serie-list');
+        if (!list) return;
+
+        if (typeof html2canvas === 'undefined') {
+            H.toast('Exportador de imagen no disponible.', 'error');
+            return;
+        }
+
+        const startBtn = document.getElementById('btn-start-ping-serie');
+        if (startBtn) startBtn.disabled = true;
+
+        // Temporarily expand to capture full scrollable content
+        const origMaxHeight = list.style.maxHeight;
+        const origOverflow = list.style.overflow;
+        list.style.maxHeight = 'none';
+        list.style.overflow = 'visible';
+
+        const width = list.scrollWidth;
+        const height = list.scrollHeight;
+
+        html2canvas(list, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            width: width,
+            height: height
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'ping-serie-' + formatTimestamp() + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch(err => {
+            H.toast('Error al exportar: ' + err.message, 'error');
+        }).finally(() => {
+            // Restore original styles
+            list.style.maxHeight = origMaxHeight;
+            list.style.overflow = origOverflow;
+            if (startBtn) startBtn.disabled = false;
+        });
+    }
+
+    function formatTimestamp() {
+        const d = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        return d.getFullYear() +
+            pad(d.getMonth() + 1) +
+            pad(d.getDate()) + '-' +
+            pad(d.getHours()) +
+            pad(d.getMinutes()) +
+            pad(d.getSeconds());
     }
 
     function escHtml(str) {

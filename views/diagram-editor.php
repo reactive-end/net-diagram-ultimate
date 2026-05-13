@@ -434,7 +434,18 @@ $canvasHeight = (int) ($diagram['height'] ?? 800);
         <div class="modal modal-xl">
             <div class="modal-header">
                 <h2>Ping en Serie</h2>
-                <button class="modal-close" onclick="PingSerie.close()">&times;</button>
+                <div class="ping-serie-header-actions">
+                    <button class="btn-icon" id="btn-edit-ping-serie" title="Activar edición" aria-label="Activar edición">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="btn-icon" id="btn-export-ping-serie" title="Exportar imagen" aria-label="Exportar imagen">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </button>
+                    <button class="btn-icon" id="btn-toggle-ping-layout" title="Vista tabla" aria-label="Vista tabla">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M6 5h11a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3M4 17a2 2 0 0 0 2 2h5v-3H4zm7-5H4v3h7zm6 7a2 2 0 0 0 2-2v-1h-7v3zm2-7h-7v3h7zM4 11h7V8H4zm8 0h7V8h-7z"/></svg>
+                    </button>
+                    <button class="modal-close" onclick="PingSerie.close()">&times;</button>
+                </div>
             </div>
             <div class="modal-body">
                 <div class="ping-serie-toolbar">
