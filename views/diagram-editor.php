@@ -45,7 +45,7 @@ $canvasHeight = (int) ($diagram['height'] ?? 800);
                 $bb = htmlspecialchars($box['border_color'] ?? '#94a3b8');
             ?>
             <div class="node-box"
-                 style="left:<?= $bx ?>px; top:<?= $by ?>px; width:<?= $bw ?>px; height:<?= $bh ?>px; background:<?= $bc ?>; border:2px solid <?= $bb ?>; position:absolute;"></div>
+                 style="left:<?= $bx ?>px; top:<?= $by ?>px; width:<?= $bw ?>px; height:<?= $bh ?>px; background:<?= $bc ?>; border:2px dashed <?= $bb ?>; position:absolute;"></div>
             <?php endforeach; ?>
 
             <?php
@@ -285,6 +285,18 @@ $canvasHeight = (int) ($diagram['height'] ?? 800);
         <button class="context-item context-item-danger" data-action="delete-line">Eliminar Enlace</button>
     </div>
 
+    <!-- Context Menu — Note -->
+    <div class="context-menu" id="context-menu-note" style="display:none;">
+        <button class="context-item" data-action="edit-note">Editar Nota</button>
+        <button class="context-item context-item-danger" data-action="delete-note">Eliminar Nota</button>
+    </div>
+
+    <!-- Context Menu — Box -->
+    <div class="context-menu" id="context-menu-box" style="display:none;">
+        <button class="context-item" data-action="edit-box">Editar Caja</button>
+        <button class="context-item context-item-danger" data-action="delete-box">Eliminar Caja</button>
+    </div>
+
     <!-- Info Panel -->
     <div class="info-panel" id="info-panel" style="display:none;">
         <div class="info-panel-header">
@@ -384,7 +396,7 @@ $canvasHeight = (int) ($diagram['height'] ?? 800);
     <div class="modal-overlay" id="modal-note" style="display:none;">
         <div class="modal modal-sm">
             <div class="modal-header">
-                <h2>Agregar Nota</h2>
+                <h2 id="note-modal-title">Agregar Nota</h2>
                 <button class="modal-close" onclick="UIModals.close('modal-note')">&times;</button>
             </div>
             <div class="modal-body">

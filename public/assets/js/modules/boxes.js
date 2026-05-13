@@ -92,7 +92,7 @@ const BoxSystem = (() => {
         box.style.width = width + 'px';
         box.style.height = height + 'px';
         box.style.background = bgColor;
-        box.style.border = '2px solid ' + borderColor;
+        box.style.border = '2px dashed ' + borderColor;
 
         canvas.appendChild(box);
         DiagramState.markDirty();

@@ -73,9 +73,11 @@ const Editor = (() => {
                 return;
             }
 
-            // Tap on object or line → context menu (mobile + desktop convenience)
+            // Tap on object, note, or box → context menu (mobile + desktop convenience)
             const object = e.target.closest('.object');
             const line = e.target.closest('.line');
+            const note = e.target.closest('.note');
+            const box = e.target.closest('.node-box');
 
             if (object) {
                 ContextMenu.showObjectMenu(e, object);
@@ -85,6 +87,14 @@ const Editor = (() => {
                 ContextMenu.showLineMenu(e, line);
                 return;
             }
+            if (note) {
+                ContextMenu.showNoteMenu(e, note);
+                return;
+            }
+            if (box) {
+                ContextMenu.showBoxMenu(e, box);
+                return;
+            }
         });
     }
 
@@ -92,15 +102,21 @@ const Editor = (() => {
         const canvas = H.$('canvas');
         if (!canvas) return;
 
-        // Object right-click
+        // Object / note / box right-click
         canvas.addEventListener('contextmenu', (e) => {
             const object = e.target.closest('.object');
             const line = e.target.closest('.line');
+            const note = e.target.closest('.note');
+            const box = e.target.closest('.node-box');
 
             if (object) {
                 ContextMenu.showObjectMenu(e, object);
             } else if (line) {
                 ContextMenu.showLineMenu(e, line);
+            } else if (note) {
+                ContextMenu.showNoteMenu(e, note);
+            } else if (box) {
+                ContextMenu.showBoxMenu(e, box);
             }
         });
 
@@ -203,21 +219,31 @@ const Editor = (() => {
             });
         }
 
-        // Add note
+        // Add / Edit note
         const addNoteBtn = H.$('btn-add-note');
         if (addNoteBtn) {
             addNoteBtn.addEventListener('click', () => {
                 const text = H.$('note-text').value.trim();
                 if (!text) return;
 
-                const viewport = H.$('canvas-viewport');
-                const x = viewport ? viewport.scrollLeft + 200 : 200;
-                const y = viewport ? viewport.scrollTop + 200 : 200;
-
-                Devices.createNote(text, x, y);
+                const editEl = window._editingNoteElement;
+                if (editEl) {
+                    // Update existing note
+                    editEl.textContent = text;
+                    editEl.dataset.text = text;
+                    window._editingNoteElement = null;
+                    H.$('note-modal-title').textContent = 'Agregar Nota';
+                    H.toast('Nota actualizada.', 'success');
+                } else {
+                    // Create new note
+                    const viewport = H.$('canvas-viewport');
+                    const x = viewport ? viewport.scrollLeft + 200 : 200;
+                    const y = viewport ? viewport.scrollTop + 200 : 200;
+                    Devices.createNote(text, x, y);
+                    H.toast('Nota agregada.', 'success');
+                }
                 H.$('modal-note').style.display = 'none';
                 H.$('note-text').value = '';
-                H.toast('Nota agregada.', 'success');
             });
         }
 
