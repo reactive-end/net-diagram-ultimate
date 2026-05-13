@@ -128,6 +128,9 @@ $router->get('/api/ip-serie/lookup',    [PingController::class, 'lookupIp']);
 $router->get('/api/canvas/{id}',        [CanvasController::class, 'getSize']);
 $router->put('/api/canvas/{id}',        [CanvasController::class, 'setSize']);
 
+// Backup
+$router->get('/api/backup',              [BackupController::class, 'export']);
+
 // --- Dispatch ---
 $request = new Request();
 $router->dispatch($request);

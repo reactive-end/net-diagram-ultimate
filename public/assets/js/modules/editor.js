@@ -159,6 +159,10 @@ const Editor = (() => {
                         ExportModule.exportToPng();
                         break;
 
+                    case 'backup':
+                        window.location.href = APP_BASE + '/api/backup';
+                        break;
+
                     case 'exit':
                         if (DiagramState.isDirty()) {
                             if (confirm('Tienes cambios sin guardar. Deseas salir?')) {
