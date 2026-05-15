@@ -32,6 +32,7 @@ class DeviceController
 
         $data = $request->body;
         unset($data['type']);
+        $data = $this->normalizeDeviceData($type, $data);
 
         $this->model->insert($type, $diagramId, $data);
         Response::success(null, 'Dispositivo guardado.');
@@ -127,6 +128,7 @@ class DeviceController
                     default:
                         if (in_array($type, Device::types(), true)) {
                             unset($obj['type']);
+                            $obj = $this->normalizeDeviceData($type, $obj);
                             $this->model->insert($type, $diagramId, $obj);
                         }
                         break;
@@ -139,7 +141,11 @@ class DeviceController
             ], 'Diagrama guardado correctamente.');
         } catch (Throwable $e) {
             $db->rollback();
-            Response::error('Error al guardar: ' . $e->getMessage(), 500);
+            $status = $e instanceof InvalidArgumentException ? 422 : 500;
+            $message = $e instanceof InvalidArgumentException
+                ? $e->getMessage()
+                : 'Error al guardar: ' . $e->getMessage();
+            Response::error($message, $status);
         }
     }
 
@@ -155,5 +161,29 @@ class DeviceController
         $objects   = $diagram->loadAllObjects($diagramId);
 
         Response::success($objects);
+    }
+
+    private function normalizeDeviceData(string $type, array $data): array
+    {
+        if ($type !== 'antenna') {
+            return $data;
+        }
+
+        $frequency = trim((string) ($data['frecuency'] ?? ''));
+        if ($frequency === '') {
+            $data['frecuency'] = 0;
+            return $data;
+        }
+
+        if (!ctype_digit($frequency)) {
+            throw new InvalidArgumentException('La frecuencia debe contener solo números.');
+        }
+
+        $data['frecuency'] = (int) $frequency;
+        if ($data['frecuency'] !== 0 && ($data['frecuency'] < 1 || $data['frecuency'] > 999999)) {
+            throw new InvalidArgumentException('La frecuencia debe estar entre 1 y 999999.');
+        }
+
+        return $data;
     }
 }

@@ -146,6 +146,11 @@ const Devices = (() => {
      */
     function updateDeviceProps(el, props) {
         Object.entries(props).forEach(([key, val]) => {
+            if (key === 'frecuency') {
+                el.dataset.frequency = val;
+                el.dataset.frecuency = val;
+                return;
+            }
             el.dataset[key] = val;
         });
         updateInfo(el);

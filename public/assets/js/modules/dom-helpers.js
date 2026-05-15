@@ -183,12 +183,37 @@ const DOMHelpers = (() => {
         });
     }
 
-    // Auto-init IP inputs on DOM ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initIpInputs);
-    } else {
-        initIpInputs();
+    /** Initialize inputs that only accept digits. */
+    function initDigitsOnlyInputs() {
+        document.querySelectorAll('input.digits-only:not(.digits-only-initialized)').forEach(input => {
+            input.classList.add('digits-only-initialized');
+
+            input.addEventListener('input', () => {
+                const cleaned = input.value.replace(/[^0-9]/g, '');
+                if (cleaned !== input.value) {
+                    input.value = cleaned;
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                input.value = paste.replace(/[^0-9]/g, '');
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+        });
     }
 
-    return { $: $, qs: qs, qsa: qsa, create: create, distance: distance, angle: angle, getCenter: getCenter, toast: toast, mouseToCanvas: mouseToCanvas, initIpInputs: initIpInputs };
+    // Auto-init IP inputs on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            initIpInputs();
+            initDigitsOnlyInputs();
+        });
+    } else {
+        initIpInputs();
+        initDigitsOnlyInputs();
+    }
+
+    return { $: $, qs: qs, qsa: qsa, create: create, distance: distance, angle: angle, getCenter: getCenter, toast: toast, mouseToCanvas: mouseToCanvas, initIpInputs: initIpInputs, initDigitsOnlyInputs: initDigitsOnlyInputs };
 })();

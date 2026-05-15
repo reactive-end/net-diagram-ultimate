@@ -11,7 +11,7 @@ const DeviceForms = (() => {
                 <div class="form-group"><label>Nombre</label><input type="text" class="form-input" name="name" required placeholder="Nombre de la antena"></div>
                 <div class="form-group"><label>SSID</label><input type="text" class="form-input" name="ssid" placeholder="SSID"></div>
                 <div class="form-group"><label>Dirección IP</label><div class="ip-input-container"><input type="text" class="form-input ip-octet" maxlength="3" pattern="[0-9]*" inputmode="numeric" data-octet="0" placeholder="192"><span class="ip-dot">.</span><input type="text" class="form-input ip-octet" maxlength="3" pattern="[0-9]*" inputmode="numeric" data-octet="1" placeholder="168"><span class="ip-dot">.</span><input type="text" class="form-input ip-octet" maxlength="3" pattern="[0-9]*" inputmode="numeric" data-octet="2" placeholder="1"><span class="ip-dot">.</span><input type="text" class="form-input ip-octet" maxlength="3" pattern="[0-9]*" inputmode="numeric" data-octet="3" placeholder="1"></div><input type="hidden" name="ip" class="ip-hidden"></div>
-                <div class="form-group"><label>Frecuencia</label><select class="form-input" name="frecuency"><option value="2400">2.4 GHz</option><option value="5000">5 GHz</option><option value="5200">5.2 GHz</option><option value="5800">5.8 GHz</option></select></div>
+                <div class="form-group"><label>Frecuencia</label><input type="text" class="form-input digits-only" name="frecuency" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Ej: 5800" value="2400" required></div>
                 <div class="form-group"><label>Modo</label><select class="form-input" name="mode"><option value="0">AP</option><option value="1">Station</option></select></div>
                 <div class="form-group"><label>Banda</label><select class="form-input" name="band"><option value="20">20 MHz</option><option value="40">40 MHz</option><option value="80">80 MHz</option><option value="160">160 MHz</option></select></div>
                 <button type="submit" class="btn btn-primary btn-full">Crear Antena</button>
@@ -52,8 +52,12 @@ const DeviceForms = (() => {
         if (title) title.textContent = 'Crear ' + Devices.deviceLabel(type);
         if (body) {
             body.innerHTML = '<form id="form-create-device">' + getCreateForm(type) + '</form>';
-            // Re-init IP inputs for dynamic content (defer to allow DOM parse)
-            setTimeout(() => { if (typeof DOMHelpers !== 'undefined') DOMHelpers.initIpInputs(); }, 10);
+            // Re-init special inputs for dynamic content (defer to allow DOM parse)
+            setTimeout(() => {
+                if (typeof DOMHelpers === 'undefined') return;
+                DOMHelpers.initIpInputs();
+                DOMHelpers.initDigitsOnlyInputs();
+            }, 10);
             const form = document.getElementById('form-create-device');
             if (form) {
                 form.addEventListener('submit', (e) => {
@@ -100,7 +104,7 @@ const DeviceForms = (() => {
                     <div class="form-group"><label>Nombre</label><input type="text" class="form-input" name="name" value="${esc(el.dataset.name)}"></div>
                     <div class="form-group"><label>SSID</label><input type="text" class="form-input" name="ssid" value="${esc(el.dataset.ssid)}"></div>
                     <div class="form-group"><label>IP</label><input type="text" class="form-input" name="ip" value="${esc(el.dataset.ip)}"></div>
-                    <div class="form-group"><label>Frecuencia</label><select class="form-input" name="frecuency"><option value="2400" ${el.dataset.frequency === '2400' ? 'selected' : ''}>2.4 GHz</option><option value="5000" ${el.dataset.frequency === '5000' ? 'selected' : ''}>5 GHz</option><option value="5200" ${el.dataset.frequency === '5200' ? 'selected' : ''}>5.2 GHz</option><option value="5800" ${el.dataset.frequency === '5800' ? 'selected' : ''}>5.8 GHz</option></select></div>
+                    <div class="form-group"><label>Frecuencia</label><input type="text" class="form-input digits-only" name="frecuency" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Ej: 5800" value="${esc(el.dataset.frequency || '2400')}" required></div>
                     <div class="form-group"><label>Modo</label><select class="form-input" name="mode"><option value="0" ${el.dataset.mode === '0' ? 'selected' : ''}>AP</option><option value="1" ${el.dataset.mode === '1' ? 'selected' : ''}>Station</option></select></div>
                     <div class="form-group"><label>Banda</label><select class="form-input" name="band"><option value="20" ${el.dataset.band === '20' ? 'selected' : ''}>20 MHz</option><option value="40" ${el.dataset.band === '40' ? 'selected' : ''}>40 MHz</option><option value="80" ${el.dataset.band === '80' ? 'selected' : ''}>80 MHz</option><option value="160" ${el.dataset.band === '160' ? 'selected' : ''}>160 MHz</option></select></div>
                     <button type="submit" class="btn btn-primary btn-full">Guardar Cambios</button>
@@ -145,6 +149,10 @@ const DeviceForms = (() => {
         }
 
         body.innerHTML = formHtml;
+
+        if (typeof DOMHelpers !== 'undefined') {
+            DOMHelpers.initDigitsOnlyInputs();
+        }
 
         const form = document.getElementById('form-edit-device');
         if (form) {
