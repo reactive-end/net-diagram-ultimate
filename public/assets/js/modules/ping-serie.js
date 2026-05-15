@@ -283,7 +283,7 @@ const PingSerie = (() => {
 
                 if (success) {
                     const hasTime = time_ms !== null && time_ms !== undefined;
-                    if (hasTime && time_ms > 300) {
+                    if (hasTime && time_ms > 30) {
                         item.className = 'ping-serie-item ping-latency';
                         setBadge(item, 'latency', time_ms + ' ms');
                     } else {
