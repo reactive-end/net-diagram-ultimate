@@ -142,30 +142,22 @@ class Diagram
      */
     public function clear(int $diagramId): void
     {
-        $this->db->beginTransaction();
-        try {
-            $tables = [
-                'diagrams_anthenas',
-                'diagrams_routers',
-                'diagrams_switchs',
-                'diagrams_modems',
-                'diagrams_computers',
-                'diagrams_notes',
-                'diagrams_lines',
-                'diagrams_box',
-            ];
+        $tables = [
+            'diagrams_anthenas',
+            'diagrams_routers',
+            'diagrams_switchs',
+            'diagrams_modems',
+            'diagrams_computers',
+            'diagrams_notes',
+            'diagrams_lines',
+            'diagrams_box',
+        ];
 
-            foreach ($tables as $table) {
-                $this->db->execute(
-                    "DELETE FROM {$table} WHERE id_diagrama = ?",
-                    [$diagramId]
-                );
-            }
-
-            $this->db->commit();
-        } catch (Throwable $e) {
-            $this->db->rollback();
-            throw $e;
+        foreach ($tables as $table) {
+            $this->db->execute(
+                "DELETE FROM {$table} WHERE id_diagrama = ?",
+                [$diagramId]
+            );
         }
     }
 

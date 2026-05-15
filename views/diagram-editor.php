@@ -45,6 +45,8 @@ $canvasHeight = (int) ($diagram['height'] ?? 800);
                 $bb = htmlspecialchars($box['border_color'] ?? '#94a3b8');
             ?>
             <div class="node-box"
+                 data-color="<?= $bc ?>"
+                 data-border-color="<?= $bb ?>"
                  style="left:<?= $bx ?>px; top:<?= $by ?>px; width:<?= $bw ?>px; height:<?= $bh ?>px; background:<?= $bc ?>; border:2px dashed <?= $bb ?>; position:absolute;"></div>
             <?php endforeach; ?>
 

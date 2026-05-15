@@ -130,8 +130,8 @@ const DiagramState = (() => {
                 pos_y: parseInt(el.style.top) || 0,
                 box_width: parseInt(el.style.width) || 100,
                 box_height: parseInt(el.style.height) || 100,
-                color: el.style.backgroundColor || '#e2e8f0',
-                border_color: el.style.borderColor || '#94a3b8',
+                color: el.dataset.color || el.style.backgroundColor || '#e2e8f0',
+                border_color: el.dataset.borderColor || el.style.borderColor || '#94a3b8',
             });
         });
 

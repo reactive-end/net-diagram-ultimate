@@ -211,9 +211,8 @@ const ContextMenu = (() => {
     }
 
     function editBox(el) {
-        // Get current colors from inline style
-        const bg = el.style.background || '#e2e8f0';
-        const borderColor = el.style.borderColor || '#94a3b8';
+        const bg = el.dataset.color || el.style.background || '#e2e8f0';
+        const borderColor = el.dataset.borderColor || el.style.borderColor || '#94a3b8';
 
         // Pre-fill the color picker modal
         H.$('box-color').value = bg;
@@ -226,6 +225,8 @@ const ContextMenu = (() => {
         const editHandler = () => {
             const newColor = H.$('box-color').value || '#e2e8f0';
             const newBorder = H.$('box-border-color').value || '#94a3b8';
+            el.dataset.color = newColor;
+            el.dataset.borderColor = newBorder;
             el.style.background = newColor;
             el.style.border = '2px dashed ' + newBorder;
             H.$('modal-color-picker').style.display = 'none';

@@ -86,6 +86,8 @@ const BoxSystem = (() => {
 
         const box = document.createElement('div');
         box.className = 'node-box';
+        box.dataset.color = bgColor;
+        box.dataset.borderColor = borderColor;
         box.style.position = 'absolute';
         box.style.left = left + 'px';
         box.style.top = top + 'px';

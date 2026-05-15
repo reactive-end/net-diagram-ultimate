@@ -174,7 +174,15 @@ class DiagramController
         Auth::require();
 
         $diagramId = (int) ($params['id'] ?? 0);
-        $this->model->clear($diagramId);
-        Response::success(null, 'Diagrama limpiado.');
+        $db = Database::getInstance();
+        $db->beginTransaction();
+        try {
+            $this->model->clear($diagramId);
+            $db->commit();
+            Response::success(null, 'Diagrama limpiado.');
+        } catch (Throwable $e) {
+            $db->rollback();
+            Response::error('Error al limpiar el diagrama: ' . $e->getMessage(), 500);
+        }
     }
 }
